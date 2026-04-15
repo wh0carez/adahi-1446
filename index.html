@@ -551,9 +551,9 @@ async function showApp() {
   // Set role UI
   const badge = document.getElementById('roleBadge');
   badge.textContent = userLabel || (userRole === 'editor' ? 'مُدخل بيانات' : 'مشاهد');
-  badge.className = 'role-badge ' + (userRole === 'editor' ? 'role-editor' : 'role-viewer');
-  document.getElementById('addBtn').style.display = userRole === 'editor' ? 'inline-flex' : 'none';
-  document.getElementById('adminBtn').style.display = userRole === 'editor' ? 'inline-flex' : 'none';
+  badge.className = 'role-badge ' + (userRole === 'owner' ? 'role-editor' : userRole === 'editor' ? 'role-editor' : 'role-viewer');
+  document.getElementById('addBtn').style.display = (userRole === 'editor' || userRole === 'owner') ? 'inline-flex' : 'none';
+  document.getElementById('adminBtn').style.display = userRole === 'owner' ? 'inline-flex' : 'none';
 
   await loadData();
   document.getElementById('appScreen').style.display = 'block';
@@ -647,7 +647,7 @@ function render() {
   if (page > pages) page = pages;
   const slice = filtered.slice((page-1)*PER, page*PER);
   const tb = document.getElementById('tbody');
-  const canEdit = userRole === 'editor';
+  const canEdit = userRole === 'editor' || userRole === 'owner';
   if (!slice.length) {
     tb.innerHTML = `<tr><td colspan="13"><div class="empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -682,7 +682,7 @@ function changePage(d) { page += d; render(); }
 // ── DETAIL ──
 function openDetail(id) {
   const r = data.find(x => x.id === id); if (!r) return;
-  const canEdit = userRole === 'editor';
+  const canEdit = userRole === 'editor' || userRole === 'owner';
   document.getElementById('detailCard').innerHTML = `
     <div class="detail-head">
       <div class="did">سجل رقم #${r.id}</div>
@@ -727,7 +727,7 @@ function openEdit(editId) {
       <div class="form-row">
         <div class="fg"><label>اسم المتبرع</label><input id="fn" value="${r.name}" placeholder="الاسم الكامل"></div>
         <div class="fg"><label>التاريخ <span style="font-size:10px;color:var(--blue);font-weight:400;cursor:pointer" onclick="setToday()" title="اضغط T لليوم">T = اليوم</span></label>
-        <input id="fd" value="${r.date}" placeholder="YYYY-MM-DD" onkeydown="if(event.key==='t'||event.key==='T'){event.preventDefault();setToday()}"></div>
+        <input id="fd" value="${r.date}" placeholder="YYYY-MM-DD" onkeydown="if(event.key==='t'||event.key==='T'||event.key==='ف'){event.preventDefault();setToday()}"></div>
       </div>
       <div class="form-row">
         <div class="fg"><label>رقم الوصل</label><input id="fr" value="${r.receipt}"></div>
