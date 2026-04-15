@@ -478,7 +478,7 @@ td:last-child{border-left:none}
 // ══════════════════════════════════════════════════════
 // ⚙️  ضع هنا رابط الـ Web App بعد نشر Apps Script
 // ══════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbwnPC0kAawBV-qHIWuRAwgCaE5TD3CcF00TfjnvXrSbh_ELtS1M3fxnq6paWAlryd42/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzjsVaNLptoXy_cEqC4DXcNIv9-duAPFpKPS8mUT5irU9Whd3gZMOFFcTDWIvAu-0Zs/exec";
 // ══════════════════════════════════════════════════════
 
 let data = [], filtered = [], sortKey = 'id', sortDir = 1, page = 1;
@@ -563,19 +563,27 @@ async function showApp() {
   autoRefreshTimer = setInterval(loadData, 30000);
 }
 
-// ── API via fetch ──
+// ── API via JSONP ──
+function jsonp(params) {
+  return new Promise((resolve, reject) => {
+    const cb = 'cb' + Date.now() + Math.floor(Math.random()*9999);
+    const url = API_URL + '?' + new URLSearchParams({...params, callback: cb});
+    const s = document.createElement('script');
+    const t = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 15000);
+    function cleanup() { clearTimeout(t); try { delete window[cb]; } catch(e){} s.remove(); }
+    window[cb] = d => { cleanup(); resolve(d); };
+    s.onerror = () => { cleanup(); reject(new Error('فشل تحميل Script')); };
+    s.src = url;
+    document.head.appendChild(s);
+  });
+}
+
 async function apiGet(params) {
-  const url = API_URL + '?' + new URLSearchParams(params).toString();
-  const r = await fetch(url, { redirect: 'follow' });
-  const text = await r.text();
-  return JSON.parse(text);
+  return jsonp(params);
 }
 
 async function apiPost(body) {
-  const url = API_URL + '?body=' + encodeURIComponent(JSON.stringify(body));
-  const r = await fetch(url, { redirect: 'follow' });
-  const text = await r.text();
-  return JSON.parse(text);
+  return jsonp({ body: JSON.stringify(body) });
 }
 
 function setSyncState(state) {
