@@ -726,7 +726,8 @@ function openEdit(editId) {
     <div class="mb">
       <div class="form-row">
         <div class="fg"><label>اسم المتبرع</label><input id="fn" value="${r.name}" placeholder="الاسم الكامل"></div>
-        <div class="fg"><label>التاريخ</label><input id="fd" value="${r.date}" placeholder="YYYY-MM-DD"></div>
+        <div class="fg"><label>التاريخ <span style="font-size:10px;color:var(--blue);font-weight:400;cursor:pointer" onclick="setToday()" title="اضغط T لليوم">T = اليوم</span></label>
+        <input id="fd" value="${r.date}" placeholder="YYYY-MM-DD" onkeydown="if(event.key==='t'||event.key==='T'){event.preventDefault();setToday()}"></div>
       </div>
       <div class="form-row">
         <div class="fg"><label>رقم الوصل</label><input id="fr" value="${r.receipt}"></div>
@@ -919,6 +920,20 @@ function toast(msg, type='') {
   t.className = 'toast ' + type + ' show';
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── SET TODAY ──
+function setToday() {
+  const fd = document.getElementById('fd');
+  if (fd) {
+    const now = new Date();
+    const d = String(now.getDate()).padStart(2,'0');
+    const m = String(now.getMonth()+1).padStart(2,'0');
+    const y = now.getFullYear();
+    fd.value = d + '/' + m + '/' + y;
+    fd.style.background = '#e6f4ea';
+    setTimeout(() => fd.style.background = '', 600);
+  }
 }
 
 // ── KEYBOARD ──
