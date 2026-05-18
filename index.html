@@ -682,6 +682,7 @@ function changePage(d) { page += d; render(); }
 // ── DETAIL ──
 function openDetail(id) {
   const r = data.find(x => x.id === id); if (!r) return;
+  window._currentRecord = r;
   const canEdit = userRole === 'editor' || userRole === 'owner';
   document.getElementById('detailCard').innerHTML = `
     <div class="detail-head">
@@ -755,7 +756,7 @@ function openEdit(editId) {
         </div>
         <div class="fg" style="display:flex;align-items:flex-end;padding-bottom:6px">
           <div class="chk-row">
-            <label class="chk-lbl"><input type="checkbox" id="fcut" ${r.cut?'checked':''}> تقطيع</label>
+            <label class="chk-lbl"><input type="checkbox" id="fcut" ${(editId||r.cut)?'checked':''}> تقطيع</label>
             <label class="chk-lbl"><input type="checkbox" id="fhang" ${r.hanging?'checked':''}> معلاق</label>
           </div>
         </div>
@@ -776,6 +777,17 @@ function openEdit(editId) {
 }
 
 async function saveRecord(editId) {
+  // Validate: أثلاث بدون يوم تسليم
+  const _ath = +document.getElementById('fath').value||0;
+  const _day = +document.getElementById('fdy').value;
+  if (_ath >= 1 && _day === 0) {
+    toast('يجب تحديد يوم التسليم عند وجود أثلاث', 'err');
+    const el = document.getElementById('fdy');
+    el.style.border = '2px solid var(--red)';
+    el.focus();
+    setTimeout(() => el.style.border = '', 2500);
+    return;
+  }
   document.getElementById('saveTxt').style.display = 'none';
   document.getElementById('saveSpinner').style.display = 'inline-block';
   const rec = {
@@ -787,7 +799,7 @@ async function saveRecord(editId) {
     adahi: +document.getElementById('fa').value||0,
     athlab: +document.getElementById('fath').value||0,
     coupon: document.getElementById('fc').value.trim(),
-    phone: document.getElementById('fph').value.trim(),
+    phone: (document.getElementById('fph').value.trim()).replace(/^'+/,''),
     day: +document.getElementById('fdy').value,
     cut: document.getElementById('fcut').checked,
     hanging: document.getElementById('fhang').checked,
@@ -928,39 +940,94 @@ function toast(msg, type='') {
 
 // ── PRINT ──
 function printDetail() {
-  const card = document.getElementById('detailCard');
-  if (!card) return;
-  const win = window.open('', '_blank', 'width=600,height=700');
+  const r = window._currentRecord;
+  if (!r) return;
+  const win = window.open('', '_blank', 'width=650,height=800');
+  const typeLabel = r.type === 'خ' ? 'خروف' : 'بقر';
+  const dayLabel = r.day === 3 ? 'اليوم الثالث' : r.day === 4 ? 'اليوم الرابع' : 'غير محدد';
+  const cutLabel = r.cut ? '✓ نعم' : '✗ لا';
+  const hangLabel = r.hanging ? '✓ نعم' : '✗ لا';
   win.document.write(`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>طباعة السجل</title>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+<title>بطاقة السجل #${r.id}</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Cairo', sans-serif; direction: rtl; padding: 30px; color: #202124; background: #fff; }
-  .print-header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: #fff; padding: 20px 24px; border-radius: 10px; margin-bottom: 20px; }
-  .print-header .did { font-size: 11px; opacity: .7; margin-bottom: 4px; }
-  .print-header h2 { font-family: 'Amiri', serif; font-size: 22px; font-weight: 700; }
-  .print-header .meta { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
-  .dmb { background: rgba(255,255,255,.2); padding: 3px 10px; border-radius: 20px; font-size: 12px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin-bottom: 16px; }
-  .dr .dl { font-size: 10px; color: #9aa0a6; margin-bottom: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
-  .dr .dv { font-size: 14px; font-weight: 600; color: #202124; }
-  .notes { padding: 11px 13px; background: #fffbea; border-right: 3px solid #f9ab00; border-radius: 0 8px 8px 0; font-size: 13px; color: #5f4500; margin-top: 8px; }
-  .footer { margin-top: 24px; padding-top: 14px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; font-size: 11px; color: #9aa0a6; }
-  .org { font-family: 'Amiri', serif; font-size: 14px; font-weight: 700; color: #1a73e8; }
-  @media print { body { padding: 15px; } }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Cairo',sans-serif;direction:rtl;background:#f0f4f8;padding:30px;color:#202124}
+  .card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.12);max-width:520px;margin:0 auto}
+  .card-top{background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%);padding:24px 28px;color:#fff}
+  .card-top .org{font-size:12px;opacity:.7;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .card-top .org::before{content:'';display:inline-block;width:20px;height:2px;background:rgba(255,255,255,.5)}
+  .card-top h1{font-family:'Amiri',serif;font-size:26px;font-weight:700;margin-bottom:8px}
+  .card-top .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(255,255,255,.2)}
+  .badge.type-kh{background:#e6f4ea;color:#188038}
+  .badge.type-bq{background:#e8f0fe;color:#1a73e8}
+  .card-body{padding:24px 28px}
+  .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9aa0a6;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #f0f0f0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  .field .label{font-size:10px;font-weight:700;color:#9aa0a6;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+  .field .value{font-size:15px;font-weight:600;color:#202124}
+  .field .value.big{font-size:22px;color:#1a73e8}
+  .field .value.yes{color:#188038}
+  .field .value.no{color:#bdbdbd}
+  .notes-box{background:#fffbea;border-right:4px solid #f9ab00;border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:20px}
+  .notes-box .label{font-size:10px;font-weight:700;color:#b06000;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .notes-box .value{font-size:13px;color:#5f4500;line-height:1.6}
+  .card-footer{background:#f8f9fa;padding:14px 28px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0}
+  .footer-org{font-family:'Amiri',serif;font-size:15px;font-weight:700;color:#1a73e8}
+  .footer-date{font-size:11px;color:#9aa0a6}
+  .divider{height:1px;background:linear-gradient(to left,transparent,#e0e0e0,transparent);margin-bottom:20px}
+  @media print{
+    body{background:#fff;padding:10px}
+    .card{box-shadow:none;border:1px solid #e0e0e0}
+    .no-print{display:none}
+  }
 </style>
 </head>
 <body>
-${card.innerHTML.replace(/<div class="mf">[\s\S]*?<\/div>\s*$/, '')}
-<div class="footer">
-  <span class="org">سجل الأضاحي 1446 هـ</span>
-  <span>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')}</span>
+<div class="card">
+  <div class="card-top">
+    <div class="org">سجل الأضاحي 1446 هـ</div>
+    <h1>${r.name}</h1>
+    <div class="badges">
+      <span class="badge">#${r.id}</span>
+      <span class="badge ${r.type==='خ'?'type-kh':'type-bq'}">${typeLabel}</span>
+      <span class="badge">${r.date}</span>
+      ${r.day ? `<span class="badge">${dayLabel}</span>` : ''}
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="section-title">معلومات التسجيل</div>
+    <div class="grid">
+      <div class="field"><div class="label">رقم الوصل</div><div class="value">${r.receipt||'—'}</div></div>
+      <div class="field"><div class="label">رقم الكوبون</div><div class="value">${r.coupon||'—'}</div></div>
+      <div class="field"><div class="label">الهاتف</div><div class="value" style="direction:ltr">${r.phone||'—'}</div></div>
+      <div class="field"><div class="label">يوم التسليم</div><div class="value">${dayLabel}</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title">تفاصيل الأضحية</div>
+    <div class="grid">
+      <div class="field"><div class="label">عدد الأضاحي</div><div class="value big">${r.adahi}</div></div>
+      <div class="field"><div class="label">عدد الأثلاث</div><div class="value big">${r.athlab||'—'}</div></div>
+      <div class="field"><div class="label">تقطيع</div><div class="value ${r.cut?'yes':'no'}">${cutLabel}</div></div>
+      <div class="field"><div class="label">معلاق</div><div class="value ${r.hanging?'yes':'no'}">${hangLabel}</div></div>
+    </div>
+    ${r.notes ? `
+    <div class="divider"></div>
+    <div class="notes-box">
+      <div class="label">ملحوظات</div>
+      <div class="value">${r.notes}</div>
+    </div>` : ''}
+  </div>
+  <div class="card-footer">
+    <span class="footer-org">سجل الأضاحي 1446 هـ</span>
+    <span class="footer-date">طُبع بتاريخ: ${new Date().toLocaleDateString('ar-SA')}</span>
+  </div>
 </div>
-<script>window.onload = function(){ window.print(); }<\/script>
+<script>window.onload=function(){window.print();}<\/script>
 </body></html>`);
   win.document.close();
 }
@@ -991,6 +1058,12 @@ document.addEventListener('keydown', e => {
   if ((e.key==='n'||e.key==='N'||e.key==='ن') && noModal && notInput) { e.preventDefault(); openEdit(); }
   const detailOpen = document.getElementById('detailModal')?.classList.contains('open');
   if ((e.key==='p'||e.key==='P'||e.key==='ط') && detailOpen) { e.preventDefault(); printDetail(); }
+  const editOpen = document.getElementById('editModal')?.classList.contains('open');
+  if ((e.key==='s'||e.key==='S'||e.key==='س') && editOpen) {
+    e.preventDefault();
+    const saveBtn = document.querySelector('#editCard .btn-primary');
+    if (saveBtn) saveBtn.click();
+  }
 });
 </script>
 </body>
