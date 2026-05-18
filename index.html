@@ -768,6 +768,10 @@ function openEdit(editId) {
     <div class="mf">
       ${editId ? `<button class="del-btn" onclick="deleteRecord(${editId})">حذف السجل</button>` : ''}
       <button class="btn btn-outline" onclick="close1('editModal')">إلغاء</button>
+      <button class="btn btn-outline" onclick="saveRecord(${editId||0}, true)" style="color:var(--blue);border-color:var(--blue)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        حفظ+طباعة
+      </button>
       <button class="btn btn-primary" onclick="saveRecord(${editId||0})">
         <span id="saveTxt">حفظ</span>
         <div id="saveSpinner" style="display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></div>
@@ -776,7 +780,7 @@ function openEdit(editId) {
   open1('editModal');
 }
 
-async function saveRecord(editId) {
+async function saveRecord(editId, printAfter=false) {
   // Validate: أثلاث بدون يوم تسليم
   const _ath = +document.getElementById('fath').value||0;
   const _day = +document.getElementById('fdy').value;
@@ -811,6 +815,13 @@ async function saveRecord(editId) {
     close1('editModal');
     toast(editId ? 'تم التعديل بنجاح' : 'تمت الإضافة بنجاح', 'ok');
     await loadData();
+    if (printAfter) {
+      // find the saved record and print it
+      const savedId = editId || (res.id);
+      const savedRec = data.find(x => x.id === savedId) || {...rec, id: savedId};
+      window._currentRecord = savedRec;
+      setTimeout(() => printDetail(), 300);
+    }
   } catch(e) {
     toast('خطأ: ' + e.message, 'err');
     document.getElementById('saveTxt').style.display = 'inline';
