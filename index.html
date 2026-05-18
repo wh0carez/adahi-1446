@@ -756,7 +756,7 @@ function openEdit(editId) {
         </div>
         <div class="fg" style="display:flex;align-items:flex-end;padding-bottom:6px">
           <div class="chk-row">
-            <label class="chk-lbl"><input type="checkbox" id="fcut" ${(editId||r.cut)?'checked':''}> تقطيع</label>
+            <label class="chk-lbl"><input type="checkbox" id="fcut" ${(editId ? r.cut : true)?'checked':''}> تقطيع</label>
             <label class="chk-lbl"><input type="checkbox" id="fhang" ${r.hanging?'checked':''}> معلاق</label>
           </div>
         </div>
@@ -1057,9 +1057,11 @@ document.addEventListener('keydown', e => {
   const notInput = !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);
   if ((e.key==='n'||e.key==='N'||e.key==='ن') && noModal && notInput) { e.preventDefault(); openEdit(); }
   const detailOpen = document.getElementById('detailModal')?.classList.contains('open');
-  if ((e.key==='p'||e.key==='P'||e.key==='ط') && detailOpen) { e.preventDefault(); printDetail(); }
+  if ((e.key==='p'||e.key==='P'||e.key==='ط') && detailOpen && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) { e.preventDefault(); printDetail(); }
   const editOpen = document.getElementById('editModal')?.classList.contains('open');
-  if ((e.key==='s'||e.key==='S'||e.key==='س') && editOpen) {
+  const activeTag = document.activeElement?.tagName;
+  const inInputField = ['INPUT','TEXTAREA','SELECT'].includes(activeTag);
+  if ((e.key==='s'||e.key==='S'||e.key==='س') && editOpen && !inInputField) {
     e.preventDefault();
     const saveBtn = document.querySelector('#editCard .btn-primary');
     if (saveBtn) saveBtn.click();
