@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>سجل الأضاحي 1446</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -94,7 +94,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);font-
 /* ── TABLE AREA ── */
 .main{padding:20px}
 .doc-paper{background:#fff;border-radius:var(--rm);box-shadow:var(--shadow);overflow:hidden;max-width:1150px;margin:0 auto}
-.table-wrap{overflow-x:auto}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{background:#f8f9fa;padding:11px 10px;text-align:right;font-weight:600;font-size:12px;
   color:var(--muted);border-bottom:2px solid var(--border);border-left:1px solid var(--border-light);
@@ -235,6 +235,87 @@ td:last-child{border-left:none}
 
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:#c0c0c0;border-radius:10px}
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  .topbar-inner { padding: 8px 12px; gap: 8px; flex-wrap: nowrap; }
+  .doc-title { font-size: 15px; }
+  .doc-subtitle { display: none; }
+  .role-badge { display: none; }
+  .topbar-actions { gap: 4px; }
+  .topbar-actions .btn-ghost:not(#addBtn) span:not(.kbd) { display: none; }
+  .topbar-actions .btn-outline:not(#adminBtn) span { display: none; }
+  #exportBtn span { display: none; }
+  .btn svg { width: 18px; height: 18px; }
+  .btn { padding: 7px 10px; }
+  #addBtn { padding: 7px 12px; }
+
+  .toolbar { padding: 8px 12px; gap: 6px; }
+  .search-box { min-width: 0; max-width: 100%; flex: 1; }
+  .fsel { font-size: 12px; padding: 6px 7px; }
+  .tdiv { display: none; }
+
+  .main { padding: 10px 8px; }
+  .doc-paper { border-radius: 8px; }
+
+  table { font-size: 12px; min-width: unset; }
+  thead th { padding: 9px 7px; font-size: 11px; }
+  td { padding: 8px 7px; }
+
+  /* Hide less important columns on mobile */
+  th:nth-child(4), td:nth-child(4),  /* الوصل */
+  th:nth-child(7), td:nth-child(7),  /* أثلاث */
+  th:nth-child(8), td:nth-child(8),  /* الكوبون */
+  th:nth-child(11), td:nth-child(11), /* الهاتف */
+  th:nth-child(13), td:nth-child(13)  /* ملحوظات */
+  { display: none; }
+
+  .pagination { padding: 10px 12px; flex-direction: column; gap: 8px; align-items: center; }
+
+  /* Modals */
+  .overlay { padding: 0; align-items: flex-end; }
+  .modal-card { border-radius: 16px 16px 0 0 !important; width: 100% !important; max-height: 92vh; }
+  .detail-card { border-radius: 16px 16px 0 0 !important; width: 100% !important; }
+
+  .form-row { grid-template-columns: 1fr; gap: 10px; }
+  .mb { padding: 14px 16px; }
+  .mh { padding: 14px 16px 12px; }
+  .mf { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .mf .btn { flex: 1; justify-content: center; }
+  .mf .del-btn { flex: 0 0 auto; }
+
+  .detail-head { padding: 18px 18px; }
+  .detail-head h3 { font-size: 18px; }
+  .detail-grid { grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+
+  /* Summary modal */
+  .sg4 { grid-template-columns: 1fr 1fr; }
+  .sc-num { font-size: 22px; }
+  .dtbl { font-size: 12px; }
+  .dtbl th, .dtbl td { padding: 7px 8px; }
+
+  /* Login */
+  .login-card { padding: 28px 22px 24px; }
+
+  /* Summary modal full screen on mobile */
+  #summaryModal .modal-card { max-height: 95vh; }
+  .sum-sec-title { font-size: 10px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-actions .btn-ghost { padding: 6px 7px; }
+  .toolbar { gap: 5px; }
+  .fsel { min-width: 0; }
+  td, th { padding: 7px 5px; }
+
+  /* On very small screens keep only essential columns */
+  th:nth-child(3), td:nth-child(3),   /* التاريخ */
+  th:nth-child(10), td:nth-child(10)  /* معلاق */
+  { display: none; }
+
+  .sg4 { grid-template-columns: 1fr 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -315,7 +396,7 @@ td:last-child{border-left:none}
     </div>
     <div class="toolbar">
       <div class="search-box">
-        <input id="search" type="text" placeholder="بحث بالاسم، رقم الوصل، الكوبون، الهاتف..." oninput="applyFilters()">
+        <input id="search" type="text" placeholder="بحث..." oninput="applyFilters()">
         <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
       </div>
       <div class="tdiv"></div>
@@ -936,7 +1017,21 @@ function exportCSV() {
 }
 
 // ── MODAL HELPERS ──
-function open1(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function open1(id) {
+  const el = document.getElementById(id);
+  el.classList.add('open');
+  document.body.style.overflow='hidden';
+  // Add drag indicator for mobile bottom sheets
+  const card = el.querySelector('.modal-card, .detail-card');
+  if (card && window.innerWidth <= 768) {
+    if (!card.querySelector('.drag-handle')) {
+      const handle = document.createElement('div');
+      handle.className = 'drag-handle';
+      handle.style.cssText = 'width:36px;height:4px;background:#d0d0d0;border-radius:4px;margin:8px auto -4px;';
+      card.insertBefore(handle, card.firstChild);
+    }
+  }
+}
 function close1(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
 function closeOverlay(id, e) { if (e.target === document.getElementById(id)) close1(id); }
 
@@ -1005,6 +1100,87 @@ function printDetail() {
     .card{box-shadow:none;border:1px solid #e0e0e0}
     .no-print{display:none}
   }
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  .topbar-inner { padding: 8px 12px; gap: 8px; flex-wrap: nowrap; }
+  .doc-title { font-size: 15px; }
+  .doc-subtitle { display: none; }
+  .role-badge { display: none; }
+  .topbar-actions { gap: 4px; }
+  .topbar-actions .btn-ghost:not(#addBtn) span:not(.kbd) { display: none; }
+  .topbar-actions .btn-outline:not(#adminBtn) span { display: none; }
+  #exportBtn span { display: none; }
+  .btn svg { width: 18px; height: 18px; }
+  .btn { padding: 7px 10px; }
+  #addBtn { padding: 7px 12px; }
+
+  .toolbar { padding: 8px 12px; gap: 6px; }
+  .search-box { min-width: 0; max-width: 100%; flex: 1; }
+  .fsel { font-size: 12px; padding: 6px 7px; }
+  .tdiv { display: none; }
+
+  .main { padding: 10px 8px; }
+  .doc-paper { border-radius: 8px; }
+
+  table { font-size: 12px; min-width: unset; }
+  thead th { padding: 9px 7px; font-size: 11px; }
+  td { padding: 8px 7px; }
+
+  /* Hide less important columns on mobile */
+  th:nth-child(4), td:nth-child(4),  /* الوصل */
+  th:nth-child(7), td:nth-child(7),  /* أثلاث */
+  th:nth-child(8), td:nth-child(8),  /* الكوبون */
+  th:nth-child(11), td:nth-child(11), /* الهاتف */
+  th:nth-child(13), td:nth-child(13)  /* ملحوظات */
+  { display: none; }
+
+  .pagination { padding: 10px 12px; flex-direction: column; gap: 8px; align-items: center; }
+
+  /* Modals */
+  .overlay { padding: 0; align-items: flex-end; }
+  .modal-card { border-radius: 16px 16px 0 0 !important; width: 100% !important; max-height: 92vh; }
+  .detail-card { border-radius: 16px 16px 0 0 !important; width: 100% !important; }
+
+  .form-row { grid-template-columns: 1fr; gap: 10px; }
+  .mb { padding: 14px 16px; }
+  .mh { padding: 14px 16px 12px; }
+  .mf { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .mf .btn { flex: 1; justify-content: center; }
+  .mf .del-btn { flex: 0 0 auto; }
+
+  .detail-head { padding: 18px 18px; }
+  .detail-head h3 { font-size: 18px; }
+  .detail-grid { grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+
+  /* Summary modal */
+  .sg4 { grid-template-columns: 1fr 1fr; }
+  .sc-num { font-size: 22px; }
+  .dtbl { font-size: 12px; }
+  .dtbl th, .dtbl td { padding: 7px 8px; }
+
+  /* Login */
+  .login-card { padding: 28px 22px 24px; }
+
+  /* Summary modal full screen on mobile */
+  #summaryModal .modal-card { max-height: 95vh; }
+  .sum-sec-title { font-size: 10px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-actions .btn-ghost { padding: 6px 7px; }
+  .toolbar { gap: 5px; }
+  .fsel { min-width: 0; }
+  td, th { padding: 7px 5px; }
+
+  /* On very small screens keep only essential columns */
+  th:nth-child(3), td:nth-child(3),   /* التاريخ */
+  th:nth-child(10), td:nth-child(10)  /* معلاق */
+  { display: none; }
+
+  .sg4 { grid-template-columns: 1fr 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
